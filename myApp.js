@@ -88,28 +88,46 @@ const findEditThenSave = (personId, done) => {
   });
 };
 
+/** 9) Use `Model.findOneAndUpdate()` */
 const findAndUpdate = (personName, done) => {
   const ageToSet = 20;
+  // busca y actualiza a la persona que coincida con el nombre pasado en el parámetro personName, actualiza la edad  
+  Person.findOneAndUpdate({name: personName},{age: ageToSet}, {new: true},(err, updatePerson)=>{
+    //{new: true} indica que se desea devolver el documento actualizado en lugar del documento original. 
+    if(err) return console.log(err);
+    done(null , updatePerson);
+  });
 
-  done(null /*, data*/);
 };
-
+/** 10) Use `Model.findByIdAndRemove or finOneAndRemove()` */
 const removeById = (personId, done) => {
-  done(null /*, data*/);
+  Person.findByIdAndRemove(personId, (err, personDelete)=>{
+    if(err) return console.log(err);
+    done(null , personDelete);
+  });
 };
 
+/** 11) Use `Model.remove()` */
 const removeManyPeople = (done) => {
   const nameToRemove = "Mary";
-
-  done(null /*, data*/);
+  Person.remove({name: nameToRemove}, (err, personRemove)=>{
+    if(err) return console.log(err)
+    done(null , personRemove);
+  });
 };
 
 const queryChain = (done) => {
   const foodToSearch = "burrito";
-
-  done(null /*, data*/);
+  Person.find({favoriteFoods: foodToSearch})
+    .sort({ name:1 }) // Orden ascendente por el campo 'name'
+    .limit(2)
+    .select({age:0}) // age:0 oculta la edad
+    .exec(function(err, people) {
+      if(err) return console.log(err)
+      done(null , people);
+    
+  });
 };
-
 /** **Well Done !!**
 /* You completed these challenges, let's go celebrate !
  */
