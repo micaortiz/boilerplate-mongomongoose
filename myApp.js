@@ -2,32 +2,90 @@ require('dotenv').config();
 const mongoose = require('mongoose')
 mongoose.connect(process.env.MONGO_URI);
 
-let Person;
+/** 2) Create a 'Person' Model */
+const personSchema = new mongoose.Schema({
+  name:{
+    type: String,
+    required: true
+  },
+  age:{
+    type: Number
+  },
+  favoriteFoods:{
+    type: [String]
+  }
+  
+})
+/** 3) Create and Save a Person */
+let Person = mongoose.model('Person', personSchema);
 
 const createAndSavePerson = (done) => {
-  done(null /*, data*/);
+  const person = new Person({
+    name:'Justin',
+    age: 25,
+    favoriteFoods: ['Ice Cream', 'Burguer']
+  } ) 
+  
+  person.save(function(err, data) {
+    if (err) return console.error(err);
+      done(null, data)
+    });
 };
 
+/** 4) Create many People with `Model.create()` */
+var arrayOfPeople = [
+  {name:'Justina' , age:26 , favoriteFoods:['Pizza','Chocolate']},
+  {name:'Drew' , age:18 , favoriteFoods:['Empanadas','Hamburguesa']},
+  {name:'Issac' , age:9 , favoriteFoods:['Queso','Lasaña']}
+]
 const createManyPeople = (arrayOfPeople, done) => {
-  done(null /*, data*/);
+  Person.create(arrayOfPeople, function (err, people){
+    if (err) return console.log(err);
+    done(null, people)
+  });
 };
 
+/** 5) Use `Model.find()` */
 const findPeopleByName = (personName, done) => {
-  done(null /*, data*/);
+  Person.find({name:personName}, function (err, personFound) {
+  //cb se utiliza para manejar el resultado de la operación de búsqueda asíncrona realizada por Person.find()
+  //toma dos parámetros: err, que contendrá un error si ocurrió durante la búsqueda, y personFound, que contendrá los resultados de la búsqueda.
+    if (err) return console.log(err);
+    done(null , personFound);
+  })
+  
 };
-
+/** 6) Use `Model.findOne()` */
 const findOneByFood = (food, done) => {
-  done(null /*, data*/);
+  Person.findOne({favoriteFoods: food}, function(err, data){
+    if(err) return console.log(err);
+    done(null , data);
+  });
 };
 
+/** 7) Use `Model.findById()` */
 const findPersonById = (personId, done) => {
-  done(null /*, data*/);
+  Person.findById(personId, function(err,data){
+    if(err) return console.log(err);
+    done(null , data);
+  });
 };
 
+/** 8) Use `Model.findById()` */
 const findEditThenSave = (personId, done) => {
   const foodToAdd = "hamburger";
-
-  done(null /*, data*/);
+  //Método .findById() para buscar una persona por _id con el parámetro personId como clave de búsqueda.
+  Person.findById(personId, (err, person)=>{
+    if(err) return console.log(err);
+    // agrega la comida al array de comidas favoritas
+    person.favoriteFoods.push(foodToAdd);
+    //// y dentro del callback - save() Person update
+    //guarde los cambios en la base de datos
+    person.save((err,updatePerson)=>{
+      if(err) return console.log(err);
+      done(null , updatePerson);
+    });
+  });
 };
 
 const findAndUpdate = (personName, done) => {
